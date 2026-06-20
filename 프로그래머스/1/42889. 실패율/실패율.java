@@ -2,39 +2,26 @@ import java.util.*;
 
 class Solution {
     public int[] solution(int N, int[] stages) {
-        int[] answer = {};
-        double[] rate = new double[N];
+        int[] challenger = new int[N + 2];
+        for (int stage : stages) {
+            challenger[stage] += 1;
+        }
+        
+        HashMap<Integer, Double> fails = new HashMap<>();
+        double total = stages.length;
         
         for (int i = 1; i <= N; i++) {
-            int reach = 0;
-            int fail = 0;
-        
-            for (int j = 0; j < stages.length; j++) {
-                if (stages[j] == i) {
-                    fail++;
-                }
-                if (stages[j] >= i) {
-                    reach++;
-                }
+            if (challenger[i] == 0) {
+                fails.put(i, 0.);
+            } else {
+                fails.put(i, challenger[i] / total);
+                total -= challenger[i];
             }
-            
-            rate[i - 1] = reach == 0 ? 0 : (double) fail / reach;
         }
         
-        Integer[] stage = new Integer[N];
-
-        for (int i = 0; i < N; i++) {
-            stage[i] = i + 1;
-        }
-
-        Arrays.sort(stage, (a, b) -> {
-            if (rate[b - 1] > rate[a - 1]) return 1;
-            if (rate[b - 1] < rate[a - 1]) return -1;
-            return a - b;
-        });
-
-        return Arrays.stream(stage)
-                     .mapToInt(Integer::intValue)
-                     .toArray();
+        return fails.entrySet().stream().sorted((o1, o2) ->
+        o1.getValue().equals(o2.getValue()) ? Integer.compare(o1.getKey(),
+        o2.getKey()) : Double.compare(o2.getValue(), o1.getValue()))
+        .mapToInt(HashMap.Entry::getKey).toArray();
     }
 }
